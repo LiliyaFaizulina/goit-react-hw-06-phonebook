@@ -8,8 +8,7 @@ const contactsSlice = createSlice({
       state.contacts.push(payload);
     },
     deleteContact(state, { payload }) {
-      const idx = state.contacts.findIndex(contact => contact.id === payload);
-      state.contacts.splice(idx, 1);
+      state.contacts = state.contacts.filter(contact => contact.id !== payload);
     },
   },
 });
