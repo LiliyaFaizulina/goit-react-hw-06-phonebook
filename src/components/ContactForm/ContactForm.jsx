@@ -1,15 +1,21 @@
 import { useState } from 'react';
-import PropTypes from 'prop-types';
+import { nanoid } from 'nanoid';
+import { useDispatch, useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
 import { Form, FormButton, Label } from './ContactForm.styled';
+import { addContact } from 'redux/contactsSlice';
+import { selectedContacts } from 'redux/selectors';
 
 const nameCheckMessage =
   "Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan";
 const telCheckMessage =
   'Phone number must be digits and can contain spaces, dashes, parentheses and can start with +';
 
-export const ContactForm = ({ updateContactList }) => {
+export const ContactForm = () => {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
+  const contacts = useSelector(selectedContacts);
+  const dispatch = useDispatch();
 
   const handleInput = e => {
     const { name, value } = e.target;
@@ -25,9 +31,19 @@ export const ContactForm = ({ updateContactList }) => {
     }
   };
 
+  const notify = name => toast(`${name} is already in contacts`);
+
   const handleSubmit = e => {
     e.preventDefault();
-    updateContactList({ name, number });
+    const newName = name.toLowerCase();
+
+    if (contacts.some(contact => contact.name.toLowerCase() === newName)) {
+      notify(name);
+      return;
+    }
+
+    dispatch(addContact({ id: nanoid(), name, number }));
+
     setName('');
     setNumber('');
   };
@@ -61,8 +77,4 @@ export const ContactForm = ({ updateContactList }) => {
       <FormButton type="submit">Add contact</FormButton>
     </Form>
   );
-};
-
-ContactForm.propTypes = {
-  updateContactList: PropTypes.func.isRequired,
 };

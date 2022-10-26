@@ -1,16 +1,37 @@
-import PropTypes from "prop-types";
-import { Contact } from "./Contact";
-import { List } from "./ContactList.styled";
+import { useSelector, useDispatch } from 'react-redux';
+import { selectedContacts, selectedFilter } from 'redux/selectors';
+import { deleteContact } from 'redux/contactsSlice';
 
-export const ContactList = ({ contacts, filter, deleteContact }) => (
+import { List, ContactItem, DeleteButton } from './ContactList.styled';
+import icon from '../../images/addressBook.svg';
+
+export const ContactList = () => {
+  const contacts = useSelector(selectedContacts);
+  const filter = useSelector(selectedFilter);
+  const dispatch = useDispatch();
+
+  const visualContacts = contacts.filter(({ name }) =>
+    name.toLowerCase().includes(filter)
+  );
+
+  return (
     <List>
-        {contacts.reduce((acc, { id, name, number }) =>
-            name.toLowerCase().includes(filter) ? [...acc, <Contact key={id} id={id} name={name} number={number} deleteContact={deleteContact} />] : acc, [])}
+      {visualContacts.map(({ name, number, id }) => (
+        <ContactItem key={id}>
+          <img src={icon} alt="Icon" width="24" height="24" />
+          <p>
+            {name}: {number}
+          </p>
+          <DeleteButton
+            type="button"
+            onClick={() => {
+              dispatch(deleteContact(id));
+            }}
+          >
+            Delete
+          </DeleteButton>
+        </ContactItem>
+      ))}
     </List>
-);
-
-ContactList.propTypes = {
-    contacts: PropTypes.arrayOf(PropTypes.object).isRequired,
-    filter: PropTypes.string.isRequired,
-    deleteContact: PropTypes.func.isRequired
-}
+  );
+};
